@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         Validator::extend('base64_jpg', function ($attribute, $value, $parameters, $validator) {
             $exploded = explode(',', $value);
             $extension = array(explode('/', mime_content_type($value))[1]);
-            $keyword = array('jpg');
+            $keyword = array('jpg','jpeg','png','gif');
             if(0 < count(array_intersect(array_map('strtolower', $extension), $keyword))){
                 return true;
             }

@@ -28,9 +28,10 @@ Route::group([
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
+    Route::post('registration', 'AuthController@registration')->name('registration');
 });
 
 Route::get('product', 'ProductController@index');
 Route::post('product', 'ProductController@store');
 Route::put('product', 'ProductController@update');
-Route::delete('product/{id}', 'ProductController@delete');
+Route::delete('product/{id}', 'ProductController@destroy');
