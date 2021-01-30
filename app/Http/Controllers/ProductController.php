@@ -47,7 +47,7 @@ class ProductController extends Controller
 
         $messsages = array(
            'base64_jpg'  => 'The image should be in \'jpg\' format',
-           'base64_size' => 'The image should be in 1024 KB',
+           'base64_size' => 'The image should less than 1024 KB',
            'required'    => 'This field is required'
         );
 
