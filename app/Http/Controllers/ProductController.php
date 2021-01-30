@@ -16,7 +16,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::with('createdBy')->paginate(5);
+        $products = Product::with('createdBy')->orderBy('id','DESC')->paginate(5);
         return response()->json(['products'=>$products],200);
     }
 
@@ -38,50 +38,17 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $product = new Product;
-        $extension = explode('/', mime_content_type($request->image_64))[1];
-        $exploded = explode(',', $request->image_64);
-        $decoded = base64_decode($exploded[1]);
-        $fileName = Str::random(20).'.'.$extension;
-
-        (int)(strlen(base64_decode($exploded[1]))/1024);
-
-        // $img = imagecreatefromstring(base64_decode($exploded[1]));
-        // if (!imagecreatefromstring(base64_decode($exploded[1]))) {
-        //     return false;
-        // }
-
-        // imagepng($img, 'tmp.png');
-        // $info = getimagesize('tmp.png');
-        // unlink('tmp.png');
-
-
-        // if ($this->check_base64_image($exploded[1])) {
-        //     print 'Image!';
-        // } else {
-        //     print 'Not an image!';
-        // }
-
-        Validator::extend('base64_image', function ($attribute, $value, $parameters, $validator) {
-            $exploded = explode(',', $value);
-            $extension = array(explode('/', mime_content_type($value))[1]);
-            $keyword = array('jpg','png','jpeg');
-            if(0 < count(array_intersect(array_map('strtolower', $extension), $keyword)))
-              {
-                return true;
-              }
-              else{
-                return false;
-
-              }
-        });
-
         $rules = array(
-           'image_64' => 'required|base64_image'
+           'title'       => 'required',
+           'price'       => 'required',
+           'description' => 'required',
+           'image'       => 'required|base64_jpg|base64_size',
         );
 
         $messsages = array(
-           'base64_image' => 'এই ঘরটি পূরণ করা আবশ্যক',
+           'base64_jpg'  => 'The image should be in \'jpg\' format',
+           'base64_size' => 'The image should be in 1024 KB',
+           'required'    => 'This field is required'
         );
 
         $validator = Validator::make($request->all(),$rules,$messsages);
@@ -89,6 +56,12 @@ class ProductController extends Controller
         if($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
+
+        $product = new Product;
+        $extension = explode('/', mime_content_type($request->image))[1];
+        $exploded = explode(',', $request->image);
+        $decoded = base64_decode($exploded[1]);
+        $fileName = Str::random(20).'.'.$extension;
 
         $path = public_path().'/image/product/'.$fileName;
         file_put_contents($path, $decoded);
