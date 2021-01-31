@@ -5,37 +5,18 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use App\Product;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function index()
     {
-        $products = Product::with('createdBy')->orderBy('id','DESC')->paginate(5);
+        $products = Product::with('updatedBy')->orderBy('id','DESC')->paginate(5);
         return response()->json(['products'=>$products],200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
 
@@ -58,54 +39,27 @@ class ProductController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
 
-        $product = new Product;
+        $product   = new Product;
         $extension = explode('/', mime_content_type($request->image))[1];
-        $exploded = explode(',', $request->image);
-        $decoded = base64_decode($exploded[1]);
-        $fileName = Str::random(20).'.'.$extension;
+        $exploded  = explode(',', $request->image);
+        $decoded   = base64_decode($exploded[1]);
+        $fileName  = Str::random(20).'.'.$extension;
 
         $path = public_path().'/image/product/'.$fileName;
         file_put_contents($path, $decoded);
 
-        $product->image = $fileName;
-        $product->price = $request->price;
-        $product->title = $request->title;
+        $product->image       = $fileName;
+        $product->price       = $request->price;
+        $product->title       = $request->title;
         $product->description = $request->description;
-        $product->user_id = 1;
+        $product->user_id     = auth()->user()->id;
         $product->save();
 
-        return $product;
+        $product->updated_by = auth()->user();
+
+        return response()->json($product,201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request)
     {
         if($request->not_edit_image == true){
@@ -127,8 +81,7 @@ class ProductController extends Controller
 
         $messsages = array(
            'base64_jpg'  => 'The image should be in jpg or png or jpeg or gif format',
-           'base64_size' => 'The image should less than 1024 KB',
-           'required'    => 'This field is required'
+           'base64_size' => 'The image should less than 1024 KB'
         );
 
         $validator = Validator::make($request->all(),$rules,$messsages);
@@ -145,9 +98,9 @@ class ProductController extends Controller
             unlink($path);
 
             $extension = explode('/', mime_content_type($request->image))[1];
-            $exploded = explode(',', $request->image);
-            $decoded = base64_decode($exploded[1]);
-            $fileName = Str::random(20).'.'.$extension;
+            $exploded  = explode(',', $request->image);
+            $decoded   = base64_decode($exploded[1]);
+            $fileName  = Str::random(20).'.'.$extension;
 
             $path = public_path().'/image/product/'.$fileName;
             file_put_contents($path, $decoded);
@@ -155,21 +108,17 @@ class ProductController extends Controller
             $product->image = $fileName;
         }
         
-        $product->price = $request->price;
-        $product->title = $request->title;
+        $product->price       = $request->price;
+        $product->title       = $request->title;
         $product->description = $request->description;
-        $product->user_id = 1;
+        $product->user_id     = auth()->user()->id;
         $product->update();
 
-        return $product;
+        $product->updated_by = auth()->user();
+        return response()->json($product,200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function destroy($id)
     {
         $product = Product::find($id);
@@ -179,26 +128,26 @@ class ProductController extends Controller
             return response()->json(['product'=>'deleted successfully'],200);
         }
         else{
-           return response()->json(['errors'=>'something went wrong'],400); 
+           return response()->json(['errors'=>'something went wrong'],204); 
         }
 
     }
 
-    public function check_base64_image($base64) {
-        $img = imagecreatefromstring(base64_decode($base64));
-        if (!imagecreatefromstring(base64_decode($base64))) {
-            return false;
-        }
+    // public function check_base64_image($base64) {
+    //     $img = imagecreatefromstring(base64_decode($base64));
+    //     if (!imagecreatefromstring(base64_decode($base64))) {
+    //         return false;
+    //     }
 
-        imagepng($img, 'tmp.png');
-        $info = getimagesize('tmp.png');
+    //     imagepng($img, 'tmp.png');
+    //     $info = getimagesize('tmp.png');
 
-        unlink('tmp.png');
+    //     unlink('tmp.png');
 
-        if ($info[0] > 0 && $info[1] > 0 && $info['mime']) {
-            return true;
-        }
+    //     if ($info[0] > 0 && $info[1] > 0 && $info['mime']) {
+    //         return true;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 }

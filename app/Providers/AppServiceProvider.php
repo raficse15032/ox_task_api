@@ -42,11 +42,11 @@ class AppServiceProvider extends ServiceProvider
 
         Validator::extend('base64_size', function ($attribute, $value, $parameters, $validator) {
             $exploded = explode(',', $value);
-            if((int)(strlen(base64_decode($exploded[1]))/1024) <= 1024){
-                return true;  
+            if((int)(strlen(base64_decode($exploded[1]))/1024) > 1024){
+                return false;  
             }
             else{
-               return false;
+               return true;
             }
         });
 

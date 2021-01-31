@@ -18,12 +18,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group([
-    'middleware' => 'api',
-    // 'namespace' => 'App\Http\Controllers',
-    // 'prefix' => 'auth'
-
-], function ($router) {
+Route::group(['middleware' => 'api'], function ($router) {
     Route::post('login', 'AuthController@login')->name('login');
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
@@ -31,7 +26,12 @@ Route::group([
     Route::post('registration', 'AuthController@registration')->name('registration');
 });
 
-Route::get('product', 'ProductController@index');
-Route::post('product', 'ProductController@store');
-Route::put('product', 'ProductController@update');
-Route::delete('product/{id}', 'ProductController@destroy');
+Route::group(['middleware' => 'auth:api'], function(){
+    Route::get('product', 'ProductController@index');
+	Route::post('product', 'ProductController@store');
+	Route::put('product', 'ProductController@update');
+	Route::delete('product/{id}', 'ProductController@destroy');
+});
+
+
+
