@@ -34,7 +34,7 @@ class AuthController extends Controller
             return $this->respondWithToken($token);
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Credentials do not match our records'], 401);
     }
 
     /**
