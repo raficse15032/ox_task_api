@@ -1,4 +1,33 @@
-<p align="center"></p>
+# product api
+
+> A Laravel project
+
+## Live
+
+``` bash
+# Live server
+http://assignment.abumohammadrafi.xyz
+
+```
+
+##  Setup
+
+``` bash
+# install dependencies
+composer update
+
+# key generate .env 
+php artisan key:generate
+
+# configure database in .env
+php artisan migrate
+
+# secrete JWT key generate in .env 
+php artisan jwt:secret
+
+# serve with hot reload at localhost:8000
+php artisan serve
+```
 <h4>php artisan jwt:secret</h4>
 <p align="center">
 <a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
