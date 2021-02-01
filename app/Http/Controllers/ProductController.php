@@ -20,55 +20,67 @@ class ProductController extends Controller
 
     public function store(CreateProductRequest $request)
     {
+        try{
+            $product   = new Product;
+            
+            $product->image       = $this->storeImage($request->image);
+            $product->price       = $request->price;
+            $product->title       = $request->title;
+            $product->description = $request->description;
+            $product->user_id     = auth()->user()->id;
+            $product->save();
 
-        $product   = new Product;
-        
-        $product->image       = $this->storeImage($request->image);
-        $product->price       = $request->price;
-        $product->title       = $request->title;
-        $product->description = $request->description;
-        $product->user_id     = auth()->user()->id;
-        $product->save();
+            $product->updated_by = auth()->user();
 
-        $product->updated_by = auth()->user();
-
-        return response()->json($product,201);
+            return response()->json($product,201);
+        }
+        catch(\Exception $e){
+            return response()->json(['message' => 'Some thing error in server'] , 401);
+        }
     }
 
     public function update(UpdateProductRequest $request)
     {
-        
-        $product = Product::find($request->id);
+        try{
+            $product = Product::find($request->id);
 
-        if($request->not_edit_image != true){
+            if($request->not_edit_image != true){
+                
+                $path = public_path()."/image/product/".$product->image;
+                unlink($path);
+
+                $product->image = $this->storeImage($request->image);
+            }
             
-            $path = public_path()."/image/product/".$product->image;
-            unlink($path);
+            $product->price       = $request->price;
+            $product->title       = $request->title;
+            $product->description = $request->description;
+            $product->user_id     = auth()->user()->id;
+            $product->update();
 
-            $product->image = $this->storeImage($request->image);
+            $product->updated_by = auth()->user();
+            return response()->json($product,200);
         }
-        
-        $product->price       = $request->price;
-        $product->title       = $request->title;
-        $product->description = $request->description;
-        $product->user_id     = auth()->user()->id;
-        $product->update();
-
-        $product->updated_by = auth()->user();
-        return response()->json($product,200);
+        catch(\Exception $e){
+            return response()->json(['message' => 'Some thing error in server'] , 401);
+        }
     }
 
-    
     public function destroy($id)
     {
-        $product = Product::find($id);
-        $path = public_path()."/image/product/".$product->image;
+        try{
+            $product = Product::find($id);
+            $path = public_path()."/image/product/".$product->image;
 
-        if(unlink($path) && $product->delete()){
-            return response()->json(['product'=>'deleted successfully'],200);
+            if(unlink($path) && $product->delete()){
+                return response()->json(['product'=>'deleted successfully'],200);
+            }
+            else{
+               return response()->json(['errors'=>'something went wrong'],204); 
+            }
         }
-        else{
-           return response()->json(['errors'=>'something went wrong'],204); 
+        catch(\Exception $e){
+            return response()->json(['message' => 'Some thing error in server'] , 401);
         }
 
     }
