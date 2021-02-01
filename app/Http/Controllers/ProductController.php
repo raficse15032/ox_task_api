@@ -5,50 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\CreateProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Product;
 
 class ProductController extends Controller
 {
-    
     public function index()
     {
         $products = Product::with('updatedBy')->orderBy('id','DESC')->paginate(5);
         return response()->json(['products'=>$products],200);
     }
 
-    public function store(Request $request)
+    public function store(CreateProductRequest $request)
     {
 
-        $rules = array(
-           'title'       => 'required',
-           'price'       => 'required',
-           'description' => 'required',
-           'image'       => 'required|base64_jpg|base64_size',
-        );
-
-        $messsages = array(
-           'base64_jpg'  => 'The image should be in jpg or png or jpeg or gif format',
-           'base64_size' => 'The image should less than 1024 KB',
-           'required'    => 'This field is required'
-        );
-
-        $validator = Validator::make($request->all(),$rules,$messsages);
-
-        if($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
-
         $product   = new Product;
-        $extension = explode('/', mime_content_type($request->image))[1];
-        $exploded  = explode(',', $request->image);
-        $decoded   = base64_decode($exploded[1]);
-        $fileName  = Str::random(20).'.'.$extension;
-
-        $path = public_path().'/image/product/'.$fileName;
-        file_put_contents($path, $decoded);
-
-        $product->image       = $fileName;
+        
+        $product->image       = $this->storeImage($request->image);
         $product->price       = $request->price;
         $product->title       = $request->title;
         $product->description = $request->description;
@@ -60,36 +35,9 @@ class ProductController extends Controller
         return response()->json($product,201);
     }
 
-    public function update(Request $request)
+    public function update(UpdateProductRequest $request)
     {
-        if($request->not_edit_image == true){
-            $rules = array(
-               'title'       => 'required',
-               'price'       => 'required',
-               'description' => 'required',
-            );
-        }
-        else{
-            $rules = array(
-               'title'       => 'required',
-               'price'       => 'required',
-               'description' => 'required',
-               'image'       => 'required|base64_jpg|base64_size',
-            );
-        }
         
-
-        $messsages = array(
-           'base64_jpg'  => 'The image should be in jpg or png or jpeg or gif format',
-           'base64_size' => 'The image should less than 1024 KB'
-        );
-
-        $validator = Validator::make($request->all(),$rules,$messsages);
-
-        if($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
-
         $product = Product::find($request->id);
 
         if($request->not_edit_image != true){
@@ -97,15 +45,7 @@ class ProductController extends Controller
             $path = public_path()."/image/product/".$product->image;
             unlink($path);
 
-            $extension = explode('/', mime_content_type($request->image))[1];
-            $exploded  = explode(',', $request->image);
-            $decoded   = base64_decode($exploded[1]);
-            $fileName  = Str::random(20).'.'.$extension;
-
-            $path = public_path().'/image/product/'.$fileName;
-            file_put_contents($path, $decoded);
-
-            $product->image = $fileName;
+            $product->image = $this->storeImage($request->image);
         }
         
         $product->price       = $request->price;
@@ -150,4 +90,15 @@ class ProductController extends Controller
 
     //     return false;
     // }
+
+    protected function storeImage($data) {
+        $extension = explode('/', mime_content_type($data))[1];
+        $exploded  = explode(',', $data);
+        $decoded   = base64_decode($exploded[1]);
+        $fileName  = Str::random(20).'.'.$extension;
+
+        $path = public_path().'/image/product/'.$fileName;
+        file_put_contents($path, $decoded);
+        return $fileName;
+    }
 }
