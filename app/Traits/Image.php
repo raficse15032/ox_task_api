@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
  
 trait StoreImageTrait {
  
-    public function storeImage(Request $request) {
+    public function storeImage($data) {
  		$extension = explode('/', mime_content_type($data))[1];
         $exploded  = explode(',', $data);
         $decoded   = base64_decode($exploded[1]);
