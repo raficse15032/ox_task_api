@@ -1,9 +1,6 @@
-# product api
+# api
 
 > A Laravel project
-
-## Live
-
 
 
 ##  Setup
