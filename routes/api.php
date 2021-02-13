@@ -27,11 +27,10 @@ Route::group(['middleware' => 'api'], function ($router) {
 });
 
 Route::group(['middleware' => 'auth:api'], function(){
-    Route::get('product', 'ProductController@index');
-	Route::post('product', 'ProductController@store');
-	Route::put('product', 'ProductController@update');
-	Route::delete('product/{id}', 'ProductController@destroy');
+    Route::get('account', 'BankController@index');
+	Route::post('account', 'BankController@store');
+	Route::put('account', 'BankController@update');
+    Route::delete('account/{id}', 'BankController@destroy');
+	Route::get('organization', 'BankController@organization');
 });
-
-
 

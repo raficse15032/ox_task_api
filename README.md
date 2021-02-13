@@ -4,11 +4,7 @@
 
 ## Live
 
-``` bash
-# Live server
-http://assignment.abumohammadrafi.xyz
 
-```
 
 ##  Setup
 
